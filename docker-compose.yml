@@ -1,0 +1,16 @@
+# docker-compose.yml
+
+services:
+  php:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: php-image-converter
+    volumes:
+      - ./src:/app/src
+      - ./images:/app/images
+      - ./output:/app/output
+    working_dir: /app
+    command: ["php", "src/convert.php"]
+    tty: true
+    stdin_open: true
