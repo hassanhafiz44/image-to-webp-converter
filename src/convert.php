@@ -199,10 +199,21 @@ class ImageConverter
      */
     public function run(): void
     {
+        $startTime = microtime(true);
+        
+        $tz = getenv('TZ');
+        if ($tz && in_array($tz, timezone_identifiers_list())) {
+            date_default_timezone_set($tz);
+        }
+        
+        $startDateTime = date('Y-m-d H:i:s T');
+        
         $this->log("");
         $this->log("╔════════════════════════════════════════════╗");
         $this->log("║     Image to WebP Converter                ║");
         $this->log("╚════════════════════════════════════════════╝");
+        $this->log("");
+        $this->log("Started at: {$startDateTime}");
         $this->log("");
         $this->log("Configuration:");
         $this->log("  • Input directory:  {$this->inputDir}");
@@ -266,9 +277,35 @@ class ImageConverter
             $this->log("  • Total savings:    {$totalSavings}%");
         }
         
+        $endTime = microtime(true);
+        $endDateTime = date('Y-m-d H:i:s T');
+        $elapsed = $endTime - $startTime;
+        
+        $this->log("  • Start time:       {$startDateTime}");
+        $this->log("  • End time:         {$endDateTime}");
+        $this->log("  • Time elapsed:     {$this->formatDuration($elapsed)}");
         $this->log("");
         $this->log("Output directory: {$this->outputDir}");
         $this->log("");
+    }
+    
+    /**
+     * Format duration in seconds to human readable format
+     */
+    private function formatDuration(float $seconds): string
+    {
+        if ($seconds < 1) {
+            return round($seconds * 1000) . 'ms';
+        }
+        
+        $minutes = (int) floor($seconds / 60);
+        $secs = fmod($seconds, 60);
+        
+        if ($minutes > 0) {
+            return sprintf('%dm %04.1fs', $minutes, $secs);
+        }
+        
+        return sprintf('%.1fs', $secs);
     }
 }
 

@@ -10,6 +10,8 @@ services:
       - ./src:/app/src
       - ./images:/app/images
       - ./output:/app/output
+    environment:
+      - TZ=${TZ:-}
     working_dir: /app
     command: ["php", "src/convert.php"]
     tty: true
