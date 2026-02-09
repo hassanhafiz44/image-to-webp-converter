@@ -1,18 +1,22 @@
 # docker-compose.yml
 
 services:
-  php:
+  converter:
     build:
       context: .
       dockerfile: docker/Dockerfile
-    container_name: php-image-converter
+    container_name: image-converter
     volumes:
-      - ./src:/app/src
-      - ./images:/app/images
+      - ./images:/app/images:ro
       - ./output:/app/output
     environment:
       - TZ=${TZ:-}
-    working_dir: /app
-    command: ["php", "src/convert.php"]
+    command: ["/app/converter"]
     tty: true
     stdin_open: true
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          memory: 2G

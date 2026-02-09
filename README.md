@@ -1,6 +1,6 @@
 # Image to WebP Converter
 
-A Dockerized PHP tool that batch-converts images (JPG, PNG, GIF, BMP, TIFF) to WebP format using ImageMagick.
+A high-performance Dockerized Rust tool that batch-converts images (JPG, PNG, GIF, BMP, TIFF) to WebP format. Uses native libwebp bindings and Rayon for data-parallel conversion across all CPU cores.
 
 ## Quick Start
 
@@ -61,28 +61,23 @@ convert.bat -q 85
 
 ```
 ╔════════════════════════════════════════════╗
-║     Image to WebP Converter                ║
+║     Image to WebP Converter (Rust)         ║
 ╚════════════════════════════════════════════╝
 
-✓ ImageMagick version: ImageMagick 7.1.1-26
-✓ WebP support: Available
+Started at: 2026-02-09 04:41:00 PKT
 
 Configuration:
   • Input directory:  /app/images
   • Output directory: /app/output
   • Quality:          80%
+  • Workers:          8
 
-Found 3 image(s) to convert
+Found 3 image(s)
+  Converting 3 file(s)
 --------------------------------------------------
-[1/3] Converting: photo.jpg
-    ✓ Saved: photo.webp
-    ✓ Size: 2.5 MB → 450 KB (82% saved)
-[2/3] Converting: logo.png
-    ✓ Saved: logo.webp
-    ✓ Size: 150 KB → 45 KB (70% saved)
-[3/3] Converting: banner.gif
-    ✓ Saved: banner.webp
-    ✓ Size: 1.2 MB → 300 KB (75% saved)
+[1/3] ✓ photo.jpg: 2.50 MB → 450.00 KB (82.00% saved)
+[2/3] ✓ logo.png: 150.00 KB → 45.00 KB (70.00% saved)
+[3/3] ✓ banner.gif: 1.20 MB → 300.00 KB (75.00% saved)
 
 ==================================================
 CONVERSION SUMMARY
@@ -91,8 +86,11 @@ CONVERSION SUMMARY
   • Successful:       3
   • Failed:           0
   • Original size:    3.85 MB
-  • New size:         795 KB
-  • Total savings:    79.8%
+  • New size:         795.00 KB
+  • Total savings:    79.80%
+  • Start time:       2026-02-09 04:41:00 PKT
+  • End time:         2026-02-09 04:41:01 PKT
+  • Time elapsed:     820ms
 
 Output directory: /app/output
 ```
@@ -103,19 +101,7 @@ jpg, jpeg, png, gif, bmp, tiff, tif
 
 ## Troubleshooting
 
-### Check WebP Support in ImageMagick
-
-```bash
-docker compose run --rm php convert -list format | grep -i webp
-```
-
-### Check Imagick Extension
-
-```bash
-docker compose run --rm php php -i | grep -i imagick
-```
-
-### Rebuild Container (after Dockerfile changes)
+### Rebuild Container (after code or Dockerfile changes)
 
 ```bash
 docker compose build --no-cache
@@ -125,13 +111,14 @@ docker compose build --no-cache
 
 ```
 ├── docker/
-│   └── Dockerfile
+│   └── Dockerfile       # Multi-stage Rust build + Alpine runtime
 ├── src/
-│   └── convert.php
-├── images/          # Input images (gitignored)
-├── output/          # Converted WebP files (gitignored)
-├── convert.sh       # Helper script (Linux/Mac)
-├── convert.bat      # Helper script (Windows)
+│   └── main.rs          # Rust source
+├── Cargo.toml           # Rust dependencies
+├── images/              # Input images (gitignored)
+├── output/              # Converted WebP files (gitignored)
+├── convert.sh           # Helper script (Linux/Mac)
+├── convert.bat          # Helper script (Windows)
 ├── docker-compose.yml
 └── README.md
 ```

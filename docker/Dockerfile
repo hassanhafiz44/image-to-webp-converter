@@ -1,36 +1,40 @@
 # docker/Dockerfile
-FROM php:8.4-cli
+
+# --- Build stage ---
+FROM rust:1.85-bookworm AS builder
+
+WORKDIR /build
+
+# Cache dependencies: copy manifests, create dummy source, build deps
+COPY Cargo.toml Cargo.lock* ./
+RUN mkdir src && echo "fn main() {}" > src/main.rs
+RUN cargo build --release 2>/dev/null || true
+RUN rm -rf src
+
+# Copy real source and build
+COPY src/ ./src/
+RUN touch src/main.rs && cargo build --release
+
+# --- Runtime stage ---
+FROM debian:bookworm-slim
 
 LABEL maintainer="Avas" \
-      description="PHP Image to WebP Converter"
+      description="Rust Image to WebP Converter"
 
-# Install system dependencies, PHP extensions, and clean up in a single layer
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libmagickwand-dev \
-    libmagickcore-dev \
-    imagemagick \
-    libwebp-dev \
-    libpng-dev \
-    libjpeg-dev \
-    libgif-dev \
-    && docker-php-ext-install -j$(nproc) pcntl opcache \
-    && pecl install imagick && docker-php-ext-enable imagick \
-    && docker-php-ext-configure gd --with-jpeg --with-webp \
-    && docker-php-ext-install -j$(nproc) gd \
-    && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
-    && rm -rf /var/lib/apt/lists/* /tmp/pear
+    ca-certificates tzdata \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --system app && useradd --system --gid app app
 
-# Verify ImageMagick supports WebP
-RUN convert -list format | grep -i webp
-
-# Set working directory
 WORKDIR /app
 
-# Set recommended PHP settings
-RUN echo "memory_limit=512M" > /usr/local/etc/php/conf.d/memory.ini
+# Copy the compiled binary from builder
+COPY --from=builder /build/target/release/image-converter /app/converter
 
-# Copy source files
-COPY src/ /app/src/
+RUN mkdir -p /app/images /app/output \
+    && chown -R app:app /app
+
+USER app
 
 # Default command runs the converter
-CMD ["php", "src/convert.php"]
+CMD ["/app/converter"]

@@ -1,2 +1,2 @@
 @echo off
-docker compose run --rm php php src/convert.php %*
+docker compose up

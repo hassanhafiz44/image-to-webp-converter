@@ -1,6 +1,12 @@
 .git
 .gitignore
 .DS_Store
+.dockerignore
 images/
 output/
+target/
+docker/
+docker-compose.yml
 README.md
+convert.sh
+convert.bat
