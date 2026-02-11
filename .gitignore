@@ -2,8 +2,8 @@
 images/
 output/
 
-# Rust build artifacts
-target/
+# Go build artifacts
+converter
 
 # OS files
 .DS_Store

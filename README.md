@@ -1,6 +1,6 @@
 # Image to WebP Converter
 
-A high-performance Dockerized Rust tool that batch-converts images (JPG, PNG, GIF, BMP, TIFF) to WebP format. Uses native libwebp bindings and Rayon for data-parallel conversion across all CPU cores.
+A high-performance Dockerized Go tool that batch-converts images (JPG, PNG, GIF, BMP, TIFF) to WebP format. Uses libwebp via CGO and goroutines for parallel conversion across all CPU cores.
 
 ## Quick Start
 
@@ -52,19 +52,20 @@ convert.bat -q 85
 
 | Flag | Description | Default |
 |------|-------------|---------|
-| `-q, --quality` | WebP quality (1-100) | 80 |
-| `-i, --input` | Input directory | /app/images |
-| `-o, --output` | Output directory | /app/output |
-| `-h, --help` | Show help | — |
+| `-q` | WebP quality (1-100) | 80 |
+| `-i` | Input directory | /app/images |
+| `-o` | Output directory | /app/output |
+| `-w` | Number of parallel workers | CPU cores |
+| `-h` | Show help | — |
 
 ## Expected Output
 
 ```
 ╔════════════════════════════════════════════╗
-║     Image to WebP Converter (Rust)         ║
+║     Image to WebP Converter (Go)           ║
 ╚════════════════════════════════════════════╝
 
-Started at: 2026-02-09 04:41:00 PKT
+Started at: 2026-02-11 16:00:00 PKT
 
 Configuration:
   • Input directory:  /app/images
@@ -88,8 +89,8 @@ CONVERSION SUMMARY
   • Original size:    3.85 MB
   • New size:         795.00 KB
   • Total savings:    79.80%
-  • Start time:       2026-02-09 04:41:00 PKT
-  • End time:         2026-02-09 04:41:01 PKT
+  • Start time:       2026-02-11 16:00:00 PKT
+  • End time:         2026-02-11 16:00:01 PKT
   • Time elapsed:     820ms
 
 Output directory: /app/output
@@ -111,10 +112,10 @@ docker compose build --no-cache
 
 ```
 ├── docker/
-│   └── Dockerfile       # Multi-stage Rust build + Alpine runtime
-├── src/
-│   └── main.rs          # Rust source
-├── Cargo.toml           # Rust dependencies
+│   └── Dockerfile       # Multi-stage Go build + Debian slim runtime
+├── main.go              # Go source
+├── go.mod               # Go module dependencies
+├── go.sum               # Go dependency checksums
 ├── images/              # Input images (gitignored)
 ├── output/              # Converted WebP files (gitignored)
 ├── convert.sh           # Helper script (Linux/Mac)
